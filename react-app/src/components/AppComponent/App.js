@@ -1,16 +1,17 @@
-import React from "react";
+import React, {useEffect} from "react";
 import "./App.css";
 import { Button, Card, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 function Todo({ todo, index, markTodo, removeTodo }) {
+  console.log(todo)
   return (
     <div
       className="todo"
 
     >
-      <span style={{ textDecoration: todo.isDone ? "line-through" : "" }}>{todo.text}</span>
+      <span style={{ textDecoration: todo.status === "done" ? "line-through" : "" }}>{todo.name}</span>
       <div>
         <Button variant="outline-success" onClick={() => markTodo(index)}>✓</Button>{' '}
         <Button variant="outline-info" onClick={() => removeTodo(index)}>✕</Button>
@@ -35,21 +36,18 @@ function FormTodo({ addTodo }) {
     <Form onSubmit={handleSubmit}> 
     <Form.Group>
       <Form.Label><b>New Todo</b></Form.Label>
-      <Form.Control type="text" className="input" value={value} onChange={e => setValue(e.target.value)} placeholder="Add new todo" />
+      <Form.Control type="text" className="input" value={value} onChange={e => setValue(e.target.value)} placeholder="New todo" />
     </Form.Group>
     <Button variant="info m-3 mb-5" type="submit">
-      Add new class
+      Add new task
     </Button>
   </Form>
   );
 }
+
+
 function App() {
-  const [todos, setTodos] = React.useState([
-    {
-      text: "This is a sampe todo",
-      isDone: false
-    }
-  ]);
+  const [todos, setTodos] = React.useState([]);
 
   const addTodo = text => {
     const newTodos = [...todos, { text }];
@@ -67,6 +65,20 @@ function App() {
     newTodos.splice(index, 1);
     setTodos(newTodos);
   };
+
+  useEffect(() => {
+    fetch('http://0.0.0.0:3000/tasks/all')
+       .then((response) => response.json())
+       .then((data) => {
+          console.log(data);
+          setTodos(data);
+       })
+       .catch((err) => {
+          console.log(err.message);
+       });
+ }, []);
+
+
 
   return (
     <div className="app">
@@ -92,5 +104,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;
