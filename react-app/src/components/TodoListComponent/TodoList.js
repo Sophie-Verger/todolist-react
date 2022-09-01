@@ -1,7 +1,10 @@
-import React, {useEffect} from "react";
-import "./App.css";
+import React, {useState, useEffect, useCallback} from "react";
+import "./TodoList.css";
 import { Button, Card, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+import { useNavigate } from "react-router-dom";
+
 
 
 function Todo({ todo, index, markTodo, removeTodo }) {
@@ -45,14 +48,33 @@ function FormTodo({ addTodo }) {
   );
 }
 
+function TodoList() {
+  let [todos, setTodos] = React.useState([]);
 
-function App() {
-  const [todos, setTodos] = React.useState([]);
+  let [name, setName] = useState("");
 
-  const addTodo = text => {
-    const newTodos = [...todos, { text }];
-    setTodos(newTodos);
-  };
+  let [status, setStatus] = useState("");
+
+  let [id, setId] = useState("");
+
+  let navigate = useNavigate();
+
+  const addTodo = useCallback(
+    (name) => {
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, status: 'todo' })
+    };
+    fetch('http://0.0.0.0:3000/tasks/add', requestOptions)
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .then(data => todos.push(data.name))
+        .then(data => console.log(todos));
+       
+  });   
+
+
 
   const markTodo = index => {
     const newTodos = [...todos];
@@ -77,34 +99,35 @@ function App() {
           console.log(err.message);
        });
  }, []);
+ 
+ 
+   return (
+     <div className="app">
+       <div className="container">
+         <h1 className="text-center mb-4">Todo List</h1>
+         <FormTodo addTodo={addTodo} />
+         <div>
+           {todos.map((todo, index) => (
+             <Card>
+               <Card.Body>
+                 <Todo
+                 key={index}
+                 index={index}
+                 todo={todo}
+                 markTodo={markTodo}
+                 removeTodo={removeTodo}
+                 />
+               </Card.Body>
+             </Card>
+           ))}
+         </div>
+       </div>
+     </div>
+   );
 
 
-
-  return (
-    <div className="app">
-      <div className="container">
-        <h1 className="text-center mb-4">Todo List</h1>
-        <FormTodo addTodo={addTodo} />
-        <div>
-          {todos.map((todo, index) => (
-            <Card>
-              <Card.Body>
-                <Todo
-                key={index}
-                index={index}
-                todo={todo}
-                markTodo={markTodo}
-                removeTodo={removeTodo}
-                />
-              </Card.Body>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 
 
-export default App;
+export default TodoList;
