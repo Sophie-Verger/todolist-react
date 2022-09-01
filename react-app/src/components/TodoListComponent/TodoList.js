@@ -3,28 +3,6 @@ import "./TodoList.css";
 import { Button, Card, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { useNavigate } from "react-router-dom";
-
-
-
-function Todo({ todo, index, markTodo, removeTodo }) {
-  console.log(todo)
-  return (
-    <div
-      className="todo"
-
-    >
-      <span style={{ textDecoration: todo.status === "done" ? "line-through" : "" }}>{todo.name}</span>
-      <div>
-        <Button variant="outline-success" onClick={() => markTodo(index)}>✓</Button>{' '}
-        <Button variant="outline-info" onClick={() => removeTodo(index)}>✕</Button>
-        {/* <Button variant="outline-danger" onClick={() => changeTodo(index)}>✏️</Button> */}
-
-      </div>
-    </div>
-  );
-}
-
 function FormTodo({ addTodo }) {
   const [value, setValue] = React.useState("");
 
@@ -48,86 +26,105 @@ function FormTodo({ addTodo }) {
   );
 }
 
-function TodoList() {
-  let [todos, setTodos] = React.useState([]);
-
-  let [name, setName] = useState("");
-
-  let [status, setStatus] = useState("");
-
-  let [id, setId] = useState("");
-
-  let navigate = useNavigate();
-
-  const addTodo = useCallback(
-    (name) => {
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, status: 'todo' })
-    };
-    fetch('http://0.0.0.0:3000/tasks/add', requestOptions)
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .then(data => todos.push(data.name))
-        .then(data => console.log(todos));
-       
-  });   
 
 
 
-  const markTodo = index => {
-    const newTodos = [...todos];
-    newTodos[index].isDone = true;
-    setTodos(newTodos);
-  };
+const TodoList = () => {
+   const [name, setName] = useState('');
+   const [status, setStatus] = useState('');
+   const [todos, setTodos] = useState([]);
 
-  const removeTodo = index => {
-    const newTodos = [...todos];
-    newTodos.splice(index, 1);
-    setTodos(newTodos);
-  };
+   // GET with fetch API
+   useEffect(() => {
+      const fetchTodos = async () => {
+         const response = await fetch(
+            'http://0.0.0.0:3000/tasks/all'
+         );
+         const data = await response.json();
+         setTodos(data);
+         console.log(todos)
+      };
+      fetchTodos();
+   }, [todos]);
 
-  useEffect(() => {
-    fetch('http://0.0.0.0:3000/tasks/all')
-       .then((response) => response.json())
-       .then((data) => {
-          console.log(data);
-          setTodos(data);
-       })
-       .catch((err) => {
-          console.log(err.message);
-       });
- }, []);
- 
- 
+   // Delete with fetchAPI
+   const deleteTodo = async (id) => {
+    
+      let response = await fetch(
+         `http://0.0.0.0:3000/tasks/${id}`,
+         {
+            method: 'DELETE',
+         }
+      );
+      if (response.status === 200) {
+         setTodos(
+          todos.filter((todo) => {
+               return todo.id !== id;
+            })
+         );
+      } else {
+         return;
+      }
+   };
+
+   // Post with fetchAPI
+   const addTodo = async (name, status) => {
+      let response = await fetch('http://0.0.0.0:3000/tasks/add', {
+         method: 'POST',
+         body: JSON.stringify({
+            name: name,
+            status: status,
+         }),
+         headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+         },
+      });
+      let data = await response.json();
+      setTodos((todos) => [data, ...todos]);
+      setName('');
+      setStatus('');
+   };
+
+
+   // change status
+   const markTodo = async (id, status) => {
+      let response = await fetch(`http://0.0.0.0:3000/tasks/${id}`, {
+         method: 'PUT',
+         body: JSON.stringify({
+            status: status === 'todo' ? 'done' : 'todo',
+         }),
+         headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+         },
+      });
+      let data = await response.json();
+      setTodos((todos) => [data, ...todos]);
+      setName('');
+      setStatus('');
+   };
+
+   const handleSubmit = (e) => {
+      e.preventDefault();
+      addTodo(name, 'todo');
+   };
+
    return (
-     <div className="app">
-       <div className="container">
-         <h1 className="text-center mb-4">Todo List</h1>
-         <FormTodo addTodo={addTodo} />
-         <div>
-           {todos.map((todo, index) => (
-             <Card>
-               <Card.Body>
-                 <Todo
-                 key={index}
-                 index={index}
-                 todo={todo}
-                 markTodo={markTodo}
-                 removeTodo={removeTodo}
-                 />
-               </Card.Body>
-             </Card>
-           ))}
-         </div>
-       </div>
-     </div>
+   <div>
+      <FormTodo addTodo={addTodo} />
+      <div>
+         {todos.map((todo) => 
+         <Card key={todo._id}>
+            <Card.Body >
+               <span style={{ textDecoration: todo.status === "done" ? "line-through" : "" }}>{todo.name} {todo._id} {todo.status}</span>
+            </Card.Body>
+            <Button variant="outline-success" onClick={() => markTodo(todo._id, todo.status)}>✓</Button>
+            <Button variant="outline-danger" onClick={() => changeTodo(todo._id, todo.name)}>✏️</Button>
+            <Button variant="outline-info" onClick={() => deleteTodo(todo._id)}>✕</Button>
+         </Card>
+         )}
+      </div>
+   </div>
    );
-
-
-}
-
-
+};
 
 export default TodoList;
