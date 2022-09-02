@@ -33,9 +33,10 @@ const TodoList = () => {
    const [status, setStatus] = useState('');
    let [todos, setTodos] = useState([]);
 
+
    // GET with fetch API
    useEffect(() => {
-      const fetchTodos = async () => {
+      const fetchTodos = async () => {    
          const response = await fetch(
             'http://0.0.0.0:3000/tasks/all'
          );
@@ -44,7 +45,7 @@ const TodoList = () => {
 
       };
       fetchTodos();
-   }, [todos]);
+   }, []);
 
    // Delete with fetchAPI
    const deleteTodo = async (id) => {
@@ -58,7 +59,7 @@ const TodoList = () => {
       if (response.status === 200) {
          setTodos(
             todos.filter((todo) => {
-               return todo.id !== id;
+               return todo._id !== id;
             })
          );
       } else {
@@ -88,8 +89,14 @@ const TodoList = () => {
    const changeTodo = async (todo) => {
       let task = document.getElementById(todo._id);
       console.log(task)
-      task.innerHTML = `<input type="text" id={ff} name="" ><Button variant="warning " type="submit">Update<Button>`
+      task.innerHTML = `<input type="text" id="edit_${todo._id}" name="edit_${todo._id}" value=${todo.name}><Button type="submit" onClick=() => {updateTodo('${todo._id}')}>Update<Button>`
    };
+
+   const updateTodo = async (id) => {
+      console.log(id)
+      let newvalue = document.getElementById("edit_" + id).value()
+      console.log(newvalue)
+   }
 
 
    // change status
@@ -104,12 +111,27 @@ const TodoList = () => {
          },
       });
       let data = await response.json();
+      console.log(data)
+      setTodos(
+         todos.filter((todo) => {
+            if (todo._id === data._id) {
+               todo.status = data.status
+            }
+            return todo
+         })
+      ); 
       //setTodos((todos) => [data, ...todos]);
       setName('');
       setStatus('');
    };
 
-
+   const filter = async (status) => {    
+      const response = await fetch(
+         `http://0.0.0.0:3000/tasks/${status}`
+      );
+      const datas = await response.json();
+      setTodos(datas);
+   }
 
    const handleSubmit = (e) => {
       e.preventDefault();
@@ -122,10 +144,11 @@ const TodoList = () => {
             <h1 className="text-center mb-4">Todo List</h1>
             <FormTodo addTodo={addTodo} />
             <div className="d-flex justify-content-around">
-               <Button variant="warning mb-5 col-3">All</Button>
+               <Button variant="warning mb-5 col-3" onClick={() => filter('all')}>All</Button>
                <Button variant="warning mb-5 col-3" onClick={() => filter('done')}>Done</Button>
-               <Button variant="warning mb-5 col-3">Todo</Button>
+               <Button variant="warning mb-5 col-3" onClick={() => filter('todo')}>Todo</Button>
             </div>
+
             <div className=" text-center">🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷</div>
             {todos.map((todo) =>
                <div className="mt-4">
@@ -142,8 +165,13 @@ const TodoList = () => {
 
                      </Card.Body>
                   </Card>
+
                </div>
             )}
+                  <div className="d-flex justify-content-around">
+                     <Button variant="danger mb-5 col-5">Delete done tasks</Button>
+                     <Button variant="danger mb-5 col-5">Delete all tasks</Button>
+                  </div>
          </div>
       </div>
    );
