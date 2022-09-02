@@ -133,6 +133,28 @@ const TodoList = () => {
       setTodos(datas);
    }
 
+   const deleteMany = async (status) => {    
+      const response = await fetch(
+         `http://0.0.0.0:3000/tasks/${status}`,
+         {
+            method: 'DELETE',
+         }
+      );
+      if (response.status === 200) {
+         if (status === 'done') {
+            setTodos(
+               todos.filter((todo) => {
+                  return todo.status !== 'done';
+               })
+            );
+         } else {
+            setTodos([]);
+         }
+      } else {
+         return;
+      }
+   }
+
    const handleSubmit = (e) => {
       e.preventDefault();
       addTodo(name, 'todo');
@@ -168,9 +190,9 @@ const TodoList = () => {
 
                </div>
             )}
-                  <div className="d-flex justify-content-around">
-                     <Button variant="danger mb-5 col-5">Delete done tasks</Button>
-                     <Button variant="danger mb-5 col-5">Delete all tasks</Button>
+                  <div className="d-flex justify-content-around mt-5">
+                     <Button variant="danger mb-5 col-5" onClick={() => deleteMany('done')}>Delete done tasks</Button>
+                     <Button variant="danger mb-5 col-5" onClick={() => deleteMany('all')}>Delete all tasks</Button>
                   </div>
          </div>
       </div>
