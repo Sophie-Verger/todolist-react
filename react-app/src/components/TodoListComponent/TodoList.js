@@ -1,38 +1,37 @@
-import React, {useState, useEffect, useCallback} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./TodoList.css";
 import { Button, Card, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function FormTodo({ addTodo }) {
-  const [value, setValue] = React.useState("");
+   const [value, setValue] = React.useState("");
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    if (!value) return;
-    addTodo(value);
-    setValue("");
-  };
+   const handleSubmit = e => {
+      e.preventDefault();
+      if (!value) return;
+      addTodo(value);
+      setValue("");
+   };
 
-  return (
-    <Form onSubmit={handleSubmit}> 
-    <Form.Group>
-      <Form.Label><b>New Todo</b></Form.Label>
-      <Form.Control type="text" className="input" value={value} onChange={e => setValue(e.target.value)} placeholder="New todo" />
-    </Form.Group>
-    <Button variant="info m-3 mb-5" type="submit">
-      Add new task
-    </Button>
-  </Form>
-  );
+   return (
+      <Form onSubmit={handleSubmit}>
+         <Form.Group>
+            <Form.Label><b>New Todo</b></Form.Label>
+            <Form.Control type="text" className="input" value={value} onChange={e => setValue(e.target.value)} placeholder="New todo" />
+         </Form.Group>
+         <Button variant="warning mt-2 mb-5 col-12" type="submit">
+            Add a new task
+         </Button>
+
+      </Form>
+   );
 }
-
-
 
 
 const TodoList = () => {
    const [name, setName] = useState('');
    const [status, setStatus] = useState('');
-   const [todos, setTodos] = useState([]);
+   let [todos, setTodos] = useState([]);
 
    // GET with fetch API
    useEffect(() => {
@@ -42,14 +41,14 @@ const TodoList = () => {
          );
          const data = await response.json();
          setTodos(data);
-         console.log(todos)
+
       };
       fetchTodos();
    }, [todos]);
 
    // Delete with fetchAPI
    const deleteTodo = async (id) => {
-    
+
       let response = await fetch(
          `http://0.0.0.0:3000/tasks/${id}`,
          {
@@ -58,7 +57,7 @@ const TodoList = () => {
       );
       if (response.status === 200) {
          setTodos(
-          todos.filter((todo) => {
+            todos.filter((todo) => {
                return todo.id !== id;
             })
          );
@@ -85,6 +84,13 @@ const TodoList = () => {
       setStatus('');
    };
 
+   // Post with fetchAPI
+   const changeTodo = async (todo) => {
+      let task = document.getElementById(todo._id);
+      console.log(task)
+      task.innerHTML = `<input type="text" id={ff} name="" ><Button variant="warning " type="submit">Update<Button>`
+   };
+
 
    // change status
    const markTodo = async (id, status) => {
@@ -98,10 +104,12 @@ const TodoList = () => {
          },
       });
       let data = await response.json();
-      setTodos((todos) => [data, ...todos]);
+      //setTodos((todos) => [data, ...todos]);
       setName('');
       setStatus('');
    };
+
+
 
    const handleSubmit = (e) => {
       e.preventDefault();
@@ -109,21 +117,35 @@ const TodoList = () => {
    };
 
    return (
-   <div>
-      <FormTodo addTodo={addTodo} />
-      <div>
-         {todos.map((todo) => 
-         <Card key={todo._id}>
-            <Card.Body >
-               <span style={{ textDecoration: todo.status === "done" ? "line-through" : "" }}>{todo.name} {todo._id} {todo.status}</span>
-            </Card.Body>
-            <Button variant="outline-success" onClick={() => markTodo(todo._id, todo.status)}>✓</Button>
-            <Button variant="outline-danger" onClick={() => changeTodo(todo._id, todo.name)}>✏️</Button>
-            <Button variant="outline-info" onClick={() => deleteTodo(todo._id)}>✕</Button>
-         </Card>
-         )}
+      <div className="app">
+         <div className="container col-6">
+            <h1 className="text-center mb-4">Todo List</h1>
+            <FormTodo addTodo={addTodo} />
+            <div className="d-flex justify-content-around">
+               <Button variant="warning mb-5 col-3">All</Button>
+               <Button variant="warning mb-5 col-3" onClick={() => filter('done')}>Done</Button>
+               <Button variant="warning mb-5 col-3">Todo</Button>
+            </div>
+            <div className=" text-center">🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷🌷</div>
+            {todos.map((todo) =>
+               <div className="mt-4">
+                  <Card id={todo._id} key={todo._id}>
+                     <Card.Body className="d-flex justify-content-between align-items-center">
+                        <div className="">
+                           <span style={{ textDecoration: todo.status === "done" ? "line-through" : "" }}>{todo.name}</span>
+                        </div>
+                        <div className="">
+                           <Button variant="outline-success m-1" onClick={() => markTodo(todo._id, todo.status)}>✓</Button>
+                           <Button variant="outline-danger m-1" onClick={() => changeTodo(todo)}>✏️</Button>
+                           <Button variant="outline-info m-1" onClick={() => deleteTodo(todo._id)}>✕</Button>
+                        </div>
+
+                     </Card.Body>
+                  </Card>
+               </div>
+            )}
+         </div>
       </div>
-   </div>
    );
 };
 
