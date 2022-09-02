@@ -27,6 +27,9 @@ function FormTodo({ addTodo }) {
    );
 }
 
+function updateTodo() {
+   console.log('hey')
+}
 
 const TodoList = () => {
    const [name, setName] = useState('');
@@ -36,7 +39,7 @@ const TodoList = () => {
 
    // GET with fetch API
    useEffect(() => {
-      const fetchTodos = async () => {    
+      const fetchTodos = async () => {
          const response = await fetch(
             'http://0.0.0.0:3000/tasks/all'
          );
@@ -89,12 +92,14 @@ const TodoList = () => {
    const changeTodo = async (todo) => {
       let task = document.getElementById(todo._id);
       console.log(task)
-      task.innerHTML = `<input type="text" id="edit_${todo._id}" name="edit_${todo._id}" value=${todo.name}><Button type="submit" onClick=() => {updateTodo('${todo._id}')}>Update<Button>`
+      task.innerHTML = `<input type="text" id="edit_${todo._id}" name="edit_${todo._id}" value=${todo.name}><Button id="button_${todo._id}" type="submit" onClick={updateTodo}>Update<Button>`
+
    };
 
-   const updateTodo = async (id) => {
-      console.log(id)
-      let newvalue = document.getElementById("edit_" + id).value()
+   const updateTodo = (event) => {
+      console.log()
+      console.log('toto')
+      let newvalue = document.getElementById("edit_").value()
       console.log(newvalue)
    }
 
@@ -111,7 +116,6 @@ const TodoList = () => {
          },
       });
       let data = await response.json();
-      console.log(data)
       setTodos(
          todos.filter((todo) => {
             if (todo._id === data._id) {
@@ -119,13 +123,10 @@ const TodoList = () => {
             }
             return todo
          })
-      ); 
-      //setTodos((todos) => [data, ...todos]);
-      setName('');
-      setStatus('');
+      );
    };
 
-   const filter = async (status) => {    
+   const filter = async (status) => {
       const response = await fetch(
          `http://0.0.0.0:3000/tasks/${status}`
       );
@@ -133,7 +134,7 @@ const TodoList = () => {
       setTodos(datas);
    }
 
-   const deleteMany = async (status) => {    
+   const deleteMany = async (status) => {
       const response = await fetch(
          `http://0.0.0.0:3000/tasks/${status}`,
          {
@@ -154,11 +155,6 @@ const TodoList = () => {
          return;
       }
    }
-
-   const handleSubmit = (e) => {
-      e.preventDefault();
-      addTodo(name, 'todo');
-   };
 
    return (
       <div className="app">
@@ -190,10 +186,10 @@ const TodoList = () => {
 
                </div>
             )}
-                  <div className="d-flex justify-content-around mt-5">
-                     <Button variant="danger mb-5 col-5" onClick={() => deleteMany('done')}>Delete done tasks</Button>
-                     <Button variant="danger mb-5 col-5" onClick={() => deleteMany('all')}>Delete all tasks</Button>
-                  </div>
+            <div className="d-flex justify-content-around mt-5">
+               <Button variant="danger mb-5 col-5" onClick={() => deleteMany('done')}>Delete done tasks</Button>
+               <Button variant="danger mb-5 col-5" onClick={() => deleteMany('all')}>Delete all tasks</Button>
+            </div>
          </div>
       </div>
    );
