@@ -27,10 +27,6 @@ function FormTodo({ addTodo }) {
    );
 }
 
-function updateTodo() {
-   console.log('hey')
-}
-
 const TodoList = () => {
    const [name, setName] = useState('');
    const [status, setStatus] = useState('');
@@ -89,18 +85,34 @@ const TodoList = () => {
    };
 
    // Post with fetchAPI
-   const changeTodo = async (todo) => {
+   const changeTodo = async (todo,) => {
       let task = document.getElementById(todo._id);
       console.log(task)
-      task.innerHTML = `<input type="text" id="edit_${todo._id}" name="edit_${todo._id}" value=${todo.name}><Button id="button_${todo._id}" type="submit" onClick={updateTodo}>Update<Button>`
+      task.innerHTML = `<input type="text" id="edit_${todo._id}" name="edit_${todo._id}" value=${todo.name}><Button id="button_${todo._id}" type="submit" onCllick={handleSubmitEdit}>Update<Button>`
+
+      /*
+      task.innerHTML = `<Form onSubmit={handleSubmitEdit}>
+                           <Form.Group>
+                              <input type="text" id="edit_${todo._id}" name="edit_${todo._id}" value=${todo.name}>
+                           </Form.Group>
+                           <Button variant="warning mt-2 mb-5 col-12" type="submit">
+                              Update
+                           </Button>
+                        </Form>`
+      */
 
    };
 
-   const updateTodo = (event) => {
-      console.log()
-      console.log('toto')
-      let newvalue = document.getElementById("edit_").value()
-      console.log(newvalue)
+  
+
+   const handleSubmitEdit = e => {
+      e.preventDefault();
+      console.log('hey')
+   };
+
+   const updateTodo = (value) => {
+      console.log(value)
+      
    }
 
 
@@ -180,7 +192,6 @@ const TodoList = () => {
                            <Button variant="outline-danger m-1" onClick={() => changeTodo(todo)}>✏️</Button>
                            <Button variant="outline-info m-1" onClick={() => deleteTodo(todo._id)}>✕</Button>
                         </div>
-
                      </Card.Body>
                   </Card>
 
